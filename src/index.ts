@@ -19,7 +19,7 @@ interface SigninBody {
   password: string
 }
 
-// In-memory user store with default users
+
 let nextId = 4
 
 const users: User[] = [
@@ -43,7 +43,7 @@ const users: User[] = [
   },
 ]
 
-// Helper function to generate auto-increment ID
+
 function generateId(): number {
   return nextId++
 }
@@ -58,7 +58,7 @@ app.get('/', (c) => {
   })
 })
 
-// POST /signup - Create new user
+
 app.post('/signup', async (c) => {
   let body: SignupBody
   try {
@@ -67,18 +67,18 @@ app.post('/signup', async (c) => {
     return c.json({ error: 'Invalid JSON' }, 400)
   }
 
-  // Validate required fields
+  
   if (!body.name || !body.email || !body.password) {
     return c.json({ error: 'Name, email, and password are required' }, 400)
   }
 
-  // Check for duplicate email
+  
   const existingUser = users.find((u) => u.email === body.email)
   if (existingUser) {
     return c.json({ error: 'Email already exists' }, 409)
   }
 
-  // Create new user
+  
   const newUser: User = {
     id: generateId(),
     name: body.name,
@@ -88,12 +88,12 @@ app.post('/signup', async (c) => {
 
   users.push(newUser)
 
-  // Return user without password
+  
   const { password, ...safeUser } = newUser
   return c.json(safeUser, 201)
 })
 
-// POST /signin - Login user
+
 app.post('/signin', async (c) => {
   let body: SigninBody
   try {
@@ -102,24 +102,24 @@ app.post('/signin', async (c) => {
     return c.json({ error: 'Invalid JSON' }, 400)
   }
 
-  // Validate required fields
+  
   if (!body.email || !body.password) {
     return c.json({ error: 'Email and password are required' }, 400)
   }
 
-  // Find user by email
+  
   const user = users.find((u) => u.email === body.email)
 
   if (!user) {
     return c.json({ error: 'User not found' }, 404)
   }
 
-  // Validate password
+  
   if (user.password !== body.password) {
     return c.json({ error: 'Incorrect password' }, 401)
   }
 
-  // Return success message with user data (without password)
+  
   const { password, ...safeUser } = user
   return c.json({
     message: 'Signin successful',
@@ -127,14 +127,13 @@ app.post('/signin', async (c) => {
   })
 })
 
-// GET /users - Get all users
+
 app.get('/users', (c) => {
-  // Return users without passwords
+  
   const safeUsers = users.map(({ password, ...user }) => user)
   return c.json(safeUsers)
 })
 
-// GET /users/:id - Get user by ID
 app.get('/users/:id', (c) => {
   const id = Number(c.req.param('id'))
   const user = users.find((u) => u.id === id)
@@ -143,7 +142,7 @@ app.get('/users/:id', (c) => {
     return c.json({ error: 'User not found' }, 404)
   }
 
-  // Return user without password
+  
   const { password, ...safeUser } = user
   return c.json(safeUser)
 })
