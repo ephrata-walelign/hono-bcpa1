@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 
 // Type definitions
 interface User {
-  id: string
+  id: number
   name: string
   email: string
   password: string
@@ -20,53 +20,42 @@ interface SigninBody {
 }
 
 // In-memory user store with default users
+let nextId = 4
+
 const users: User[] = [
   {
-    id: 'user_1',
+    id: 1,
     name: 'Alice Smith',
     email: 'alice@example.com',
     password: 'password123',
   },
   {
-    id: 'user_2',
+    id: 2,
     name: 'Bob Johnson',
     email: 'bob@example.com',
     password: 'password456',
   },
   {
-    id: 'user_3',
+    id: 3,
     name: 'Charlie Brown',
     email: 'charlie@example.com',
     password: 'password789',
   },
 ]
 
-// Helper function to generate unique ID
-function generateId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+// Helper function to generate auto-increment ID
+function generateId(): number {
+  return nextId++
 }
 
 const app = new Hono()
 
-// GET /users - Get all users
-app.get('/users', (c) => {
-  // Return users without passwords
-  const safeUsers = users.map(({ password, ...user }) => user)
-  return c.json(safeUsers)
-})
-
-// GET /users/:id - Get user by ID
-app.get('/users/:id', (c) => {
-  const id = c.req.param('id')
-  const user = users.find((u) => u.id === id)
-
-  if (!user) {
-    return c.json({ error: 'User not found' }, 404)
-  }
-
-  // Return user without password
-  const { password, ...safeUser } = user
-  return c.json(safeUser)
+// Welcome message
+app.get('/', (c) => {
+  return c.json({
+    message: 'Welcome to the Auth API!'
+    
+  })
 })
 
 // POST /signup - Create new user
@@ -126,6 +115,27 @@ app.post('/signin', async (c) => {
     message: 'Signin successful',
     user: safeUser,
   })
+})
+
+// GET /users - Get all users
+app.get('/users', (c) => {
+  // Return users without passwords
+  const safeUsers = users.map(({ password, ...user }) => user)
+  return c.json(safeUsers)
+})
+
+// GET /users/:id - Get user by ID
+app.get('/users/:id', (c) => {
+  const id = Number(c.req.param('id'))
+  const user = users.find((u) => u.id === id)
+
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+
+  // Return user without password
+  const { password, ...safeUser } = user
+  return c.json(safeUser)
 })
 
 export default app
