@@ -60,7 +60,12 @@ app.get('/', (c) => {
 
 // POST /signup - Create new user
 app.post('/signup', async (c) => {
-  const body = await c.req.json<SignupBody>()
+  let body: SignupBody
+  try {
+    body = await c.req.json<SignupBody>()
+  } catch (e) {
+    return c.json({ error: 'Invalid JSON' }, 400)
+  }
 
   // Validate required fields
   if (!body.name || !body.email || !body.password) {
@@ -90,7 +95,12 @@ app.post('/signup', async (c) => {
 
 // POST /signin - Login user
 app.post('/signin', async (c) => {
-  const body = await c.req.json<SigninBody>()
+  let body: SigninBody
+  try {
+    body = await c.req.json<SigninBody>()
+  } catch (e) {
+    return c.json({ error: 'Invalid JSON' }, 400)
+  }
 
   // Validate required fields
   if (!body.email || !body.password) {
@@ -101,12 +111,12 @@ app.post('/signin', async (c) => {
   const user = users.find((u) => u.email === body.email)
 
   if (!user) {
-    return c.json({ error: 'Invalid credentials' }, 401)
+    return c.json({ error: 'User not found' }, 404)
   }
 
   // Validate password
   if (user.password !== body.password) {
-    return c.json({ error: 'Invalid credentials' }, 401)
+    return c.json({ error: 'Incorrect password' }, 401)
   }
 
   // Return success message with user data (without password)
